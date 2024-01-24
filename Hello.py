@@ -11,7 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import yfinance as yf
+import yahoo_fin.stock_info as si
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime
+from datetime import date
+import xlrd
+import os
+import requests
+import xlrd
+import urllib
 import streamlit as st
 from streamlit.logger import get_logger
 
@@ -24,27 +35,68 @@ def run():
         page_icon="👋",
     )
 
-    st.write("# Welcome to Streamlit! 👋")
+    FundCode = "2239"
+    cF = 0
 
-    st.sidebar.success("Select a demo above.")
+    YearMonth = date.today().strftime('%Y%m')
+    link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
+    fileName, headers = urllib.request.urlretrieve(link)
+    wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+    fundData = pd.read_excel(wb,header=None,usecols="A,C",skiprows=1, nrows=10,engine='xlrd').T
+    fundData.columns = fundData.iloc[0]
+    fundData=fundData[1:]
+    fundData = fundData.infer_objects()
+
+    NAV = fundData['AUM*1'].iloc[0]
+    LevRatio = 2
+    futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
+    futLastPrice = (futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
+    futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
+    fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
+    cfFactor=(cF+NAV)/NAV
+
+    TargetPosition = LevRatio*NAV*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
+
+    FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
+    futPositions = FundPositions[FundPositions.Category=="Future"]
+    curFutPostion = futPositions['Value(Local)'].sum() / 5 /futPositions['Price'].mean()
+
+    TargetTrade = TargetPosition - curFutPostion
+
+    st.write(FundCode +':     '+str(TargetTrade.round(1))+' Micros')
+
+    FundCode = "2240"
+    cF = 0
+
+    YearMonth = date.today().strftime('%Y%m')
+    link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
+    fileName, headers = urllib.request.urlretrieve(link)
+    wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
+
+    fundData = pd.read_excel(wb,header=None,usecols="A,C",skiprows=1, nrows=10,engine='xlrd').T
+    fundData.columns = fundData.iloc[0]
+    fundData=fundData[1:]
+    fundData = fundData.infer_objects()
+
+    NAV = fundData['AUM*1'].iloc[0]
+    LevRatio = -1
+    futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
+    futLastPrice = (futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
+    futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
+    fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
+    cfFactor=(cF+NAV)/NAV
+
+    TargetPosition = LevRatio*NAV*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
+
+    FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
+    futPositions = FundPositions[FundPositions.Category=="Future"]
+    curFutPostion = futPositions['Value(Local)'].sum() / 50 /futPositions['Price'].mean()
+
+    TargetTrade = TargetPosition - curFutPostion
+
+    st.write(FundCode +':     '+str(TargetTrade.round(1))+' Minis')
+
 
 
 if __name__ == "__main__":
