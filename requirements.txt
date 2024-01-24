@@ -4,6 +4,7 @@ pandas
 pydeck
 streamlit
 yfinance
+yahoo_fin
 requests_html
 xlrd
 datetime
