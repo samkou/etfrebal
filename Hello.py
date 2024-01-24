@@ -97,9 +97,9 @@ def run():
     TargetTrade = TargetPosition - curFutPostion
 
     st.write(FundCode +':     '+str(TargetTrade.round(1))+' Minis')
-    st.write('Futures: '+'{:.6}'.format(futLastPrice))
-    st.write('{:.2%}'.format(futPctChange))
-    st.write('JPY: '+'{:.5}'.format(fxJPY))
+    st.write('Futures: '+'{:.6}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
+    st.write()
+    st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
 
 if __name__ == "__main__":
     run()
