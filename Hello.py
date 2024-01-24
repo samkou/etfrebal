@@ -52,7 +52,7 @@ def run():
     NAV = fundData['AUM*1'].iloc[0]
     LevRatio = 2
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
-    futLastPrice = (futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
+    futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
     cfFactor=(cF+NAV)/NAV
@@ -83,7 +83,7 @@ def run():
     NAV = fundData['AUM*1'].iloc[0]
     LevRatio = -1
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
-    futLastPrice = (futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
+    futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
     cfFactor=(cF+NAV)/NAV
@@ -97,8 +97,9 @@ def run():
     TargetTrade = TargetPosition - curFutPostion
 
     st.write(FundCode +':     '+str(TargetTrade.round(1))+' Minis')
-
-
+    st.write('Futures: '+'{:.6}'.format(futLastPrice))
+    st.write('{:.2%}'.format(futPctChange))
+    st.write('JPY: '+'{:.5}'.format(fxJPY))
 
 if __name__ == "__main__":
     run()
