@@ -41,15 +41,15 @@ def calcOutputs(cF2239,cF2240):
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
     cfFactor=(cF2239+nav)/nav
 
-    TargetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
+    targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
     curFutPostion = futPositions['Value(Local)'].sum() / 5 /futPositions['Price'].mean()
 
-    TargetTrade = TargetPosition - curFutPostion
-
-    st.write(FundCode +':     '+str(TargetTrade.round(1))+' Micros')
+    targetTrade = targetPosition - curFutPostion
+    liveFundWeight = curFutPostion / targetPosition * LevRatio
+    st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Micros &nbsp; ')
 
     FundCode = "2240"
     #cF2240 = 0
@@ -73,15 +73,15 @@ def calcOutputs(cF2239,cF2240):
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
     cfFactor=(cF2240+nav)/nav
 
-    TargetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
+    targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
     curFutPostion = futPositions['Value(Local)'].sum() / 50 /futPositions['Price'].mean()
 
-    TargetTrade = TargetPosition - curFutPostion
-
-    st.write(FundCode +':     '+str(TargetTrade.round(1))+' Minis')
+    targetTrade = targetPosition - curFutPostion
+    liveFundWeight = curFutPostion / targetPosition * LevRatio
+    st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Minis &nbsp; ')
     st.write('Futures: '+'{:.6}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
     st.write()
     st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
