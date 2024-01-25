@@ -22,9 +22,10 @@ def calcOutputs(cF2239,cF2240):
 
     FundCode = "2239"
     #cF2239 = 0
-
+    
     YearMonth = date.today().strftime('%Y%m')
-    link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
+    #link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
+    link ='https://www.dropbox.com/scl/fi/l7nda0z6loqo0gqvk6ums/2239_202401.xls?rlkey=khoxushwv1scbbfb3pkz5qvk5&dl=1'
     fileName, headers = urllib.request.urlretrieve(link)
     wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
 
@@ -55,7 +56,8 @@ def calcOutputs(cF2239,cF2240):
     #cF2240 = 0
 
     YearMonth = date.today().strftime('%Y%m')
-    link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
+    #link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
+    link = 'https://www.dropbox.com/scl/fi/hsk6n7vc6clnimap09ay8/2240_202401.xls?rlkey=nrz4fy22kx1d6tb6pq07yw4wx&dl=1'
     fileName, headers = urllib.request.urlretrieve(link)
     wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
 
