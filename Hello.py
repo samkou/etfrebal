@@ -18,14 +18,10 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+def calcOutputs(cF2239,cF2240):    
 
     FundCode = "2239"
-    cF = 0
+    #cF2239 = 0
 
     YearMonth = date.today().strftime('%Y%m')
     link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
@@ -43,7 +39,7 @@ def run():
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
-    cfFactor=(cF+NAV)/NAV
+    cfFactor=(cF2239+NAV)/NAV
 
     TargetPosition = LevRatio*NAV*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
 
@@ -56,7 +52,7 @@ def run():
     st.write(FundCode +':     '+str(TargetTrade.round(1))+' Micros')
 
     FundCode = "2240"
-    cF = 0
+    #cF2240 = 0
 
     YearMonth = date.today().strftime('%Y%m')
     link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
@@ -74,7 +70,7 @@ def run():
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
-    cfFactor=(cF+NAV)/NAV
+    cfFactor=(cF2240+NAV)/NAV
 
     TargetPosition = LevRatio*NAV*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
 
@@ -88,6 +84,10 @@ def run():
     st.write('Futures: '+'{:.6}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
     st.write()
     st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
+    
 
 if __name__ == "__main__":
-    run()
+    
+    cF2239 = st.number_input('2239 CF:', format="%f")
+    cF2240 = st.number_input('2240 CF:',format="%f")
+    calcOutputs(cF2239,cF2240)

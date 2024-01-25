@@ -9,3 +9,5 @@ requests_html
 xlrd
 datetime
 matplotlib
+requests
+urllib
