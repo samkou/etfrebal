@@ -1,5 +1,4 @@
 
-
 import yfinance as yf
 import yahoo_fin.stock_info as si
 import pandas as pd
@@ -34,15 +33,15 @@ def calcOutputs(cF2239,cF2240):
     fundData=fundData[1:]
     fundData = fundData.infer_objects()
 
-    NAV = fundData['AUM*1'].iloc[0]
+    nav = fundData['AUM*1'].iloc[0]
     LevRatio = 2
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
-    cfFactor=(cF2239+NAV)/NAV
+    cfFactor=(cF2239+nav)/nav
 
-    TargetPosition = LevRatio*NAV*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
+    TargetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
@@ -66,15 +65,15 @@ def calcOutputs(cF2239,cF2240):
     fundData=fundData[1:]
     fundData = fundData.infer_objects()
 
-    NAV = fundData['AUM*1'].iloc[0]
+    nav = fundData['AUM*1'].iloc[0]
     LevRatio = -1
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
     fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
-    cfFactor=(cF2240+NAV)/NAV
+    cfFactor=(cF2240+nav)/nav
 
-    TargetPosition = LevRatio*NAV*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
+    TargetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
