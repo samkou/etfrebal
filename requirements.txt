@@ -10,4 +10,3 @@ xlrd
 datetime
 matplotlib
 requests
-urllib
