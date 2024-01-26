@@ -56,7 +56,7 @@ def calcOutputs(cF2239,cF2240):
 
     YearMonth = date.today().strftime('%Y%m')
     #link ='https://www.nikkoam.com/files/etf/_shared/xls/portfolio/'+FundCode+'_'+YearMonth+'.xls'
-    link = 'https://www.dropbox.com/scl/fi/hsk6n7vc6clnimap09ay8/2240_202401.xls?rlkey=nrz4fy22kx1d6tb6pq07yw4wx&dl=1'
+    link = 'https://www.dropbox.com/scl/fi/c89h5c99239p0itd5zp79/2240_202401.xls?rlkey=4vc3vk9jgddtjv5dted4heuad&dl=1'
     fileName, headers = urllib.request.urlretrieve(link)
     wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
 
