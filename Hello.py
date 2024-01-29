@@ -32,7 +32,7 @@ def calcOutputs(cF2239,cF2240):
     fundData.columns = fundData.iloc[0]
     fundData=fundData[1:]
     fundData = fundData.infer_objects()
-
+    date2239 = pd.read_excel(wb,header=None,usecols="A",skiprows=0, nrows=1,engine='xlrd')
     nav = fundData['AUM*1'].iloc[0]
     LevRatio = 2
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
@@ -86,7 +86,10 @@ def calcOutputs(cF2239,cF2240):
     
     st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
     st.write('Current Position - &nbsp; &nbsp; 2239: '+ '{:.0f}'.format(temp2239Pos)+' &nbsp; &nbsp;' +' 2240: '+ '{:.0f}'.format(curFutPosition))
+    st.write('&nbsp;')
+    st.write(date2239.at[0,0])
 
+    
 if __name__ == "__main__":
     
     cF2239 = st.number_input('2239 CF:',step=100000000.00, format="%f")
