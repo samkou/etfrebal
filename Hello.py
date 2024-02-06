@@ -27,7 +27,12 @@ def calcOutputs(cF2239,cF2240):
     #link ='https://www.dropbox.com/scl/fi/l7nda0z6loqo0gqvk6ums/2239_202401.xls?rlkey=khoxushwv1scbbfb3pkz5qvk5&dl=1'
     fileName, headers = urllib.request.urlretrieve(link)
     wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
-
+    
+    fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
+    futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
+    futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
+    futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
+    
     fundData = pd.read_excel(wb,header=None,usecols="A,C",skiprows=1, nrows=10,engine='xlrd').T
     fundData.columns = fundData.iloc[0]
     fundData=fundData[1:]
@@ -35,10 +40,7 @@ def calcOutputs(cF2239,cF2240):
     date2239 = pd.read_excel(wb,header=None,usecols="A",skiprows=0, nrows=1,engine='xlrd')
     nav = fundData['AUM*1'].iloc[0]
     LevRatio = 2
-    futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
-    futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
-    futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
-    fxJPY = yf.Ticker("USDJPY=X").fast_info['last_price']
+    
     cfFactor=(cF2239+nav)/nav
 
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
@@ -51,6 +53,7 @@ def calcOutputs(cF2239,cF2240):
     liveFundWeight = curFutPosition / targetPosition * LevRatio
     st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Micros &nbsp; ')
     temp2239Pos = curFutPosition
+    
     FundCode = "2240"
     #cF2240 = 0
 
@@ -67,10 +70,8 @@ def calcOutputs(cF2239,cF2240):
 
     nav = fundData['AUM*1'].iloc[0]
     LevRatio = -1
-    futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
-    futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
-    futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
-    fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
+
+    
     cfFactor=(cF2240+nav)/nav
 
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
