@@ -38,7 +38,7 @@ def calcOutputs(cF2239,cF2240):
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
-    fxJPY = yf.Ticker("JPY=X").fast_info['last_price']
+    fxJPY = yf.Ticker("USDJPY=X").fast_info['last_price']
     cfFactor=(cF2239+nav)/nav
 
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
