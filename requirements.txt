@@ -10,5 +10,5 @@ xlrd
 datetime
 matplotlib
 requests
-yahoo_finance
+yahoo-finance
 googlefinance
