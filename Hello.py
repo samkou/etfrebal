@@ -1,7 +1,7 @@
 
 import yfinance as yf
 import yahoo_fin.stock_info as si
-import yahoo-finance as yfin
+import yahoo_finance as yfin
 import googlefinance as gfin
 import pandas as pd
 import numpy as np
