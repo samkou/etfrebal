@@ -1,8 +1,8 @@
 
 import yfinance as yf
 import yahoo_fin.stock_info as si
-import yahoo_finance as yfin
-import googlefinance as gfin
+#import yahoo_finance as yfin
+#import googlefinance as gfin
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ def calcOutputs(cF2239,cF2240):
     fileName, headers = urllib.request.urlretrieve(link)
     wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
     
-    fxJPY = yfin.Share('JPY=X').get_price #yf.Ticker("JPY=X").fast_info['last_price']
+    fxJPY = yf.Ticker("JPY=X").fast_info['last_price'] #yfin.Share('JPY=X').get_price() 
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
