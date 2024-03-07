@@ -44,15 +44,16 @@ def calcOutputs(cF2239,cF2240):
     LevRatio = 2
     
     cfFactor=(cF2239+nav)/nav
-
+    
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
     curFutPosition = futPositions['Value(Local)'].sum() / 5 /futPositions['Price'].mean()
-
+    prevInvRatio2239 = futPositions['Value(JPY)'].sum()/nav
     targetTrade = targetPosition - curFutPosition
     liveFundWeight = curFutPosition / targetPosition * LevRatio
+    st.title(date2239.at[0,0])
     st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Micros &nbsp; ')
     temp2239Pos = curFutPosition
     
@@ -75,26 +76,31 @@ def calcOutputs(cF2239,cF2240):
 
     
     cfFactor=(cF2240+nav)/nav
-
+    
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
     curFutPosition = futPositions['Value(Local)'].sum() / 50 /futPositions['Price'].mean()
-
+    prevInvRatio2240 = futPositions['Value(JPY)'].sum()/nav
     targetTrade = targetPosition - curFutPosition
     liveFundWeight = curFutPosition / targetPosition * LevRatio
+ 
     st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Minis &nbsp; ')
-    st.write('Futures: '+'{:.6}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
-    
+    st.markdown('---')
+    st.write('Futures: '+'{:.7}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
     st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
-    st.write('Current Position - &nbsp; &nbsp; 2239: '+ '{:.0f}'.format(temp2239Pos)+' &nbsp; &nbsp;' +' 2240: '+ '{:.0f}'.format(curFutPosition))
-    st.write('&nbsp;')
-    st.write(date2239.at[0,0])
+    st.write('Current Position - &nbsp; 2239: '+ '{:.0f}'.format(temp2239Pos)+' &nbsp; &nbsp;' +' 2240: '+ '{:.0f}'.format(curFutPosition))
+
+    
+    st.markdown('---')
+    st.write('NAV Weight Check')
+    st.write('2239: '+'{:+.2%}'.format(prevInvRatio2239))
+    st.write('2240: '+'{:+.2%}'.format(prevInvRatio2240))
 
     
 if __name__ == "__main__":
-    
+
     cF2239 = st.number_input('2239 CF:',step=100000000.00, format="%f")
     cF2240 = st.number_input('2240 CF:',step=100000000.00,format="%f")
     calcOutputs(cF2239,cF2240)
