@@ -53,7 +53,7 @@ def calcOutputs(cF2239,cF2240):
     prevInvRatio2239 = futPositions['Value(JPY)'].sum()/nav
     targetTrade = targetPosition - curFutPosition
     liveFundWeight = curFutPosition / targetPosition * LevRatio
-    st.title(date2239.at[0,0])
+    st.title('Live')
     st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Micros &nbsp; ')
     temp2239Pos = curFutPosition
     
@@ -90,13 +90,12 @@ def calcOutputs(cF2239,cF2240):
     st.markdown('---')
     st.write('Futures: '+'{:.7}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
     st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
-    st.write('Current Position - &nbsp; 2239: '+ '{:.0f}'.format(temp2239Pos)+' &nbsp; &nbsp;' +' 2240: '+ '{:.0f}'.format(curFutPosition))
+    #st.write('Current Position - &nbsp; 2239: '+ '{:.0f}'.format(temp2239Pos)+' &nbsp; &nbsp;' +' 2240: '+ '{:.0f}'.format(curFutPosition))
 
-    
     st.markdown('---')
-    st.write('NAV Weight Check')
-    st.write('2239: '+'{:+.2%}'.format(prevInvRatio2239))
-    st.write('2240: '+'{:+.2%}'.format(prevInvRatio2240))
+    st.write(date2239.at[0,0] + ' NAV Check')
+    st.write('2239: '+'{:+.2%}'.format(prevInvRatio2239) +'&nbsp; | &nbsp;' + '{:.0f}'.format(temp2239Pos))
+    st.write('2240: '+'{:+.2%}'.format(prevInvRatio2240)+'&nbsp; | &nbsp;' + '{:.0f}'.format(curFutPosition))
 
     
 if __name__ == "__main__":
