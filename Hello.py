@@ -33,12 +33,16 @@ def calcOutputs(cF2239,cF2240):
     fxJPY = 1/yf.Ticker("JPYUSD=X").fast_info['last_price'] #yfin.Share('JPY=X').get_price() 
     futuresdf = pd.DataFrame([yf.Ticker("ES=F").info])
     futLastPrice = yf.Ticker("ES=F").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
-    futPctChange = futLastPrice/futuresdf['previousClose'].iloc[0]-1
+    
+    FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
+    futPositions = FundPositions[FundPositions.Category=="Future"]
+    curFutPosition = futPositions['Value(Local)'].sum() / 5 /futPositions['Price'].mean()
     
     fundData = pd.read_excel(wb,header=None,usecols="A,C",skiprows=1, nrows=10,engine='xlrd').T
     fundData.columns = fundData.iloc[0]
-    fundData=fundData[1:]
+    fundData = fundData[1:]
     fundData = fundData.infer_objects()
+    futPctChange = futLastPrice/futPositions['Price'].mean()-1
     date2239 = pd.read_excel(wb,header=None,usecols="A",skiprows=0, nrows=1,engine='xlrd')
     nav = fundData['AUM*1'].iloc[0]
     LevRatio = 2
@@ -47,9 +51,7 @@ def calcOutputs(cF2239,cF2240):
     
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
 
-    FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
-    futPositions = FundPositions[FundPositions.Category=="Future"]
-    curFutPosition = futPositions['Value(Local)'].sum() / 5 /futPositions['Price'].mean()
+
     prevInvRatio2239 = futPositions['Value(JPY)'].sum()/nav
     targetTrade = targetPosition - curFutPosition
     liveFundWeight = curFutPosition / targetPosition * LevRatio
@@ -68,20 +70,23 @@ def calcOutputs(cF2239,cF2240):
 
     fundData = pd.read_excel(wb,header=None,usecols="A,C",skiprows=1, nrows=10,engine='xlrd').T
     fundData.columns = fundData.iloc[0]
-    fundData=fundData[1:]
+    fundData = fundData[1:]
     fundData = fundData.infer_objects()
+
+    FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
+    futPositions = FundPositions[FundPositions.Category=="Future"]
+    curFutPosition = futPositions['Value(Local)'].sum() / 50 /futPositions['Price'].mean()
 
     nav = fundData['AUM*1'].iloc[0]
     LevRatio = -1
 
+    futPctChange = futLastPrice/futPositions['Price'].mean()-1
     
     cfFactor=(cF2240+nav)/nav
     
     targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
 
-    FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
-    futPositions = FundPositions[FundPositions.Category=="Future"]
-    curFutPosition = futPositions['Value(Local)'].sum() / 50 /futPositions['Price'].mean()
+
     prevInvRatio2240 = futPositions['Value(JPY)'].sum()/nav
     targetTrade = targetPosition - curFutPosition
     liveFundWeight = curFutPosition / targetPosition * LevRatio
