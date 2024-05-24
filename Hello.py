@@ -75,7 +75,7 @@ def calcOutputs(cF2239,cF2240):
 
     FundPositions = pd.read_excel(wb,skiprows= range(1, 13),skipfooter=3,header=1,engine='xlrd')
     futPositions = FundPositions[FundPositions.Category=="Future"]
-    curFutPosition = futPositions['Value(Local)'].sum() / 50 /futPositions['Price'].mean()
+    curFutPosition = futPositions['Value(Local)'].sum() / 5 /futPositions['Price'].mean()
 
     nav = fundData['AUM*1'].iloc[0]
     LevRatio = -1
@@ -84,14 +84,14 @@ def calcOutputs(cF2239,cF2240):
     
     cfFactor=(cF2240+nav)/nav
     
-    targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*50*futLastPrice)*cfFactor
+    targetPosition = LevRatio*nav*(1+LevRatio*futPctChange)/(fxJPY*5*futLastPrice)*cfFactor
 
 
     prevInvRatio2240 = futPositions['Value(JPY)'].sum()/nav
     targetTrade = targetPosition - curFutPosition
     liveFundWeight = curFutPosition / targetPosition * LevRatio
  
-    st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Minis &nbsp; ')
+    st.write(FundCode +':     '+ '{:+.2%}'.format(liveFundWeight)+' &nbsp; &nbsp;' + '{:.1f}'.format(targetTrade) +' Micros &nbsp; ')
     st.markdown('---')
     st.write('Futures: '+'{:.7}'.format(futLastPrice)  +' &nbsp; &nbsp;'+'{:+.2%}'.format(futPctChange))
     st.write('JPY: '+'{:.5}'.format(fxJPY) +' &nbsp; &nbsp;'+ '{:+.2%}'.format(futPositions['FX Rate'].mean()/fxJPY-1))
