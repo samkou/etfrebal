@@ -30,7 +30,7 @@ def calcOutputs(cF2239,cF2240):
     fileName, headers = urllib.request.urlretrieve(link)
     wb = xlrd.open_workbook(fileName, logfile=open(os.devnull, 'w'))
     
-    fxJPY = 1/yf.Ticker("JPYUSD=X").fast_info['last_price'] #yfin.Share('JPY=X').get_price() 
+    fxJPY = yf.Ticker('JPY=X').history(period='1d', interval='1m')['Close'].iloc[-1] 
     futuresdf = pd.DataFrame([yf.Ticker("ESU24.CME").info])
     futLastPrice = yf.Ticker("ESU24.CME").fast_info['last_price'] #(futuresdf['ask'].iloc[0]+futuresdf['bid'].iloc[0])/2
     
