@@ -105,6 +105,6 @@ def calcOutputs(cF2239,cF2240):
     
 if __name__ == "__main__":
 
-    cF2239 = st.number_input('2239 CF:',step=100000000.00, format="%f")
-    cF2240 = st.number_input('2240 CF:',step=100000000.00,format="%f")
+    cF2239 = st.number_input('2239 CF:',step=10000000.00, format="%f")
+    cF2240 = st.number_input('2240 CF:',step=10000000.00,format="%f")
     calcOutputs(cF2239,cF2240)
