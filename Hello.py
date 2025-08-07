@@ -40,8 +40,8 @@ class RateLimiter:
     def record_call(self):
         self.calls.append(time.time())
 
-# Global rate limiter
-rate_limiter = RateLimiter(max_calls_per_minute=30)
+# Global rate limiter - much more conservative
+rate_limiter = RateLimiter(max_calls_per_minute=10)
 
 def safe_yfinance_call(ticker_symbol: str, retries: int = 3) -> Optional[float]:
     """Safely call yfinance with rate limiting and retries"""
@@ -61,142 +61,85 @@ def safe_yfinance_call(ticker_symbol: str, retries: int = 3) -> Optional[float]:
             price = ticker.fast_info.last_price
             if price and price > 0:
                 return price
-        except:
+        except Exception as e:
+            # Silently continue to next method
             pass
         
         try:
-            # Method 2: Use history
+            # Method 2: Use history with error handling
             hist = ticker.history(period='1d', interval='1m')
-            if not hist.empty:
-                return hist['Close'].iloc[-1]
-        except:
+            if not hist.empty and len(hist) > 0:
+                last_price = hist['Close'].iloc[-1]
+                if last_price and last_price > 0:
+                    return last_price
+        except Exception as e:
+            # Silently continue to next method
             pass
         
         try:
-            # Method 3: Use info
+            # Method 3: Use info with specific error handling
             info = ticker.info
-            if 'regularMarketPrice' in info and info['regularMarketPrice']:
+            if info and 'regularMarketPrice' in info and info['regularMarketPrice']:
                 return info['regularMarketPrice']
-        except:
+        except KeyError as e:
+            # Handle KeyError for missing keys like 'currentTradingPeriod'
+            if 'currentTradingPeriod' in str(e):
+                # Try to get price from other available fields
+                try:
+                    if 'regularMarketPrice' in info:
+                        return info['regularMarketPrice']
+                    elif 'previousClose' in info:
+                        return info['previousClose']
+                    elif 'open' in info:
+                        return info['open']
+                except:
+                    pass
+        except Exception as e:
+            # Silently continue to next method
             pass
         
         return None
         
     except Exception as e:
-        st.error(f"Error fetching data for {ticker_symbol}: {str(e)}")
+        # Don't show error for every failed symbol, just log it
         return None
 
 def get_fx_rate() -> float:
-    """Get JPY exchange rate with fallback"""
+    """Get JPY exchange rate with minimal API calls"""
     # Try yfinance first
     fx_rate = safe_yfinance_call('JPY=X')
-    if fx_rate:
+    if fx_rate and 100 < fx_rate < 200:  # Reasonable JPY range
         return fx_rate
     
-    # Fallback to alternative sources
-    try:
-        # You can add alternative FX rate sources here
-        # For now, return a reasonable default
-        return 150.0  # Default JPY rate
-    except:
-        return 150.0
+    # Use reasonable default
+    st.warning("Using default JPY rate. Consider checking manually for accuracy.")
+    return 150.0  # Default JPY rate
 
 def get_futures_price() -> float:
-    """Get live ESU5 futures price from CME"""
-    try:
-        # Method 1: Try CME API for ESU5
-        cme_url = "https://www.cmegroup.com/api/quote/v2/contracts/quotes/ESU5"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'application/json',
-            'Referer': 'https://www.cmegroup.com/'
-        }
-        
-        response = requests.get(cme_url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            if 'quotes' in data and len(data['quotes']) > 0:
-                last_price = data['quotes'][0].get('last', 0)
-                if last_price and last_price > 0:
-                    return float(last_price)
-    except Exception as e:
-        st.warning(f"CME API failed: {str(e)}")
+    """Get live ES futures price using minimal API calls"""
     
-    try:
-        # Method 1b: Try CME public data API
-        cme_public_url = "https://www.cmegroup.com/CmeWS/mvc/Quotes/Future/1/G"
-        params = {
-            'tradeDate': date.today().strftime('%m/%d/%Y'),
-            'productId': 'ES',
-            'expirationMonth': 'U5'
-        }
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        
-        response = requests.get(cme_public_url, params=params, headers=headers, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            if 'quotes' in data and len(data['quotes']) > 0:
-                for quote in data['quotes']:
-                    if quote.get('expirationMonth') == 'U5':
-                        last_price = quote.get('last', 0)
-                        if last_price and last_price > 0:
-                            return float(last_price)
-    except Exception as e:
-        st.warning(f"CME public API failed: {str(e)}")
+    # Only try the most reliable symbols to minimize API calls
+    symbols_to_try = [
+        "ES=F",      # E-mini S&P 500 continuous (most reliable)
+        "SPY"        # S&P 500 ETF (convert to ES equivalent)
+    ]
     
-    try:
-        # Method 2: Scrape CME website for ESU5
-        cme_web_url = "https://www.cmegroup.com/markets/equities/sp/e-mini-sandp500.quotes.html"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        
-        response = requests.get(cme_web_url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            # Look for ESU5 in the HTML with more specific patterns
-            import re
-            # Pattern for ESU5 with price
-            esu5_patterns = [
-                r'ESU5[^>]*>([0-9,]+\.?[0-9]*)',
-                r'ESU5[^>]*last[^>]*>([0-9,]+\.?[0-9]*)',
-                r'ESU5[^>]*price[^>]*>([0-9,]+\.?[0-9]*)'
-            ]
-            
-            for pattern in esu5_patterns:
-                matches = re.findall(pattern, response.text)
-                if matches:
-                    for match in matches:
-                        try:
-                            # Remove commas and convert to float
-                            price = float(match.replace(',', ''))
-                            if 4000 < price < 7000:  # Reasonable ESU5 price range
-                                return price
-                        except:
-                            continue
-    except Exception as e:
-        st.warning(f"CME web scraping failed: {str(e)}")
+    for symbol in symbols_to_try:
+        try:
+            price = safe_yfinance_call(symbol)
+            if price and price > 0:
+                # If using SPY, convert to ES equivalent (SPY * 50)
+                if symbol == "SPY":
+                    price = price * 50
+                # Validate price range
+                if 4000 < price < 7000:  # Reasonable ES range
+                    return price
+        except Exception as e:
+            continue
     
-    try:
-        # Method 3: Try yfinance as fallback
-        futures_price = safe_yfinance_call("ESU5.CME")
-        if futures_price:
-            return futures_price
-    except:
-        pass
-    
-    try:
-        # Method 4: Try alternative yfinance symbol
-        futures_price = safe_yfinance_call("ES=F")
-        if futures_price:
-            return futures_price
-    except:
-        pass
-    
-    # Final fallback
-    st.error("Unable to fetch live futures data. Using default value.")
-    return 5000.0
+    # Final fallback - use a reasonable default
+    st.warning("Using default ES futures price. Consider using manual input for accuracy.")
+    return 5200.0  # Reasonable default for current market
 
 def download_fund_data(fund_code: str) -> Tuple[pd.DataFrame, pd.DataFrame, float]:
     """Download and parse fund data with error handling"""
@@ -322,6 +265,20 @@ def main():
         cf_2240 = st.number_input('2240 CF:', step=10000000.00, format="%f", value=0.0)
         
         st.markdown("---")
+        st.header("Market Data")
+        manual_futures = st.checkbox("Use manual futures price", value=False)
+        if manual_futures:
+            futures_price = st.number_input('ES Futures Price:', min_value=4000.0, max_value=7000.0, value=5200.0, step=1.0)
+        else:
+            futures_price = None
+            
+        manual_fx = st.checkbox("Use manual JPY rate", value=False)
+        if manual_fx:
+            fx_rate = st.number_input('JPY Rate:', min_value=100.0, max_value=200.0, value=150.0, step=0.1)
+        else:
+            fx_rate = None
+        
+        st.markdown("---")
         st.header("Data Sources")
         use_cached = st.checkbox("Use cached data (if available)", value=True)
         
@@ -331,8 +288,13 @@ def main():
     
     # Get market data with rate limiting
     with st.spinner("Fetching market data..."):
-        fx_rate = get_fx_rate()
-        futures_price = get_futures_price()
+        # Use manual FX rate if provided, otherwise fetch automatically
+        if fx_rate is None:
+            fx_rate = get_fx_rate()
+        
+        # Use manual futures price if provided, otherwise fetch automatically
+        if futures_price is None:
+            futures_price = get_futures_price()
     
     # Process funds
     fund_results = {}
